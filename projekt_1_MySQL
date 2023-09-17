@@ -1,0 +1,197 @@
+CREATE DATABASE serwis;
+
+USE serwis;
+
+/* Część 1 projektu - stworzenie bazy danych dla serwisu, który pokaże relację między samochodami, klientami i naprawami */ 
+
+/* Stworzenie tabeli z danymi o samochodach */ 
+
+CREATE TABLE samochod
+( 
+car_no INT NOT NULL PRIMARY KEY,
+car_id INT NOT NULL,
+customer_id INT,
+company_id VARCHAR (6),
+VIN_no VARCHAR (17) NOT NULL CHECK(length(VIN_no) = 17),
+car_registration VARCHAR (7) NOT NULL,
+visit_no INT NOT NULL,
+date_of_visit DATE NOT NULL
+);
+
+/* Stworzenie tabeli z danymi o klientach indywidualnych */ 
+
+CREATE TABLE klient_ind
+(
+customer_id INT NOT NULL PRIMARY KEY,
+first_name VARCHAR (14) CHECK(length(first_name) > 2),
+last_name VARCHAR (20) CHECK(length(last_name) > 2),
+phone_number INT
+);
+
+/* Dodanie FK do tabeli samochod*/ 
+
+ALTER TABLE samochod
+ADD CONSTRAINT fk_customer_id  FOREIGN KEY (customer_id)
+REFERENCES klient_ind(customer_id);
+
+/* Stworzenie tabeli z danymi o klientach biznesowych */ 
+
+CREATE TABLE klient_biz
+(
+company_id VARCHAR (6) NOT NULL PRIMARY KEY,
+first_name VARCHAR (14) NOT NULL CHECK(length(first_name) > 2),
+last_name VARCHAR (20) NOT NULL CHECK(length(last_name) > 2),
+company_name VARCHAR (50) NOT NULL,
+phone_number INT NOT NULL,
+email_address VARCHAR (50)
+);
+
+/* Dodanie FK do tabeli samochod */ 
+
+ALTER TABLE samochod
+ADD CONSTRAINT fk_company_id FOREIGN KEY (company_id)
+REFERENCES klient_biz(company_id);
+
+/* Stworzenie tabeli z danymi o przeglądach i naprawach */ 
+
+CREATE TABLE przeglady_naprawy
+(
+VIN_no VARCHAR (17) NOT NULL PRIMARY KEY CHECK(length(VIN_no) = 17),
+part_no VARCHAR (14),
+emp_no INT NOT NULL,
+profit DECIMAL(10,2),
+cost DECIMAL(10,2),
+warranty_repair_no INT DEFAULT 0
+);
+
+/* Dodanie FK do tabeli samochod */ 
+
+ALTER TABLE samochod
+ADD CONSTRAINT fk_VIN_no FOREIGN KEY (VIN_no)
+REFERENCES przeglady_naprawy(VIN_no);
+
+/* Stworzenie tabeli z danymi o naprawach gwarancyjnych */ 
+
+CREATE TABLE gwarancja
+(
+warranty_repair_no INT DEFAULT 0 PRIMARY KEY,
+emp_no INT NOT NULL,
+part_no VARCHAR (14) NOT NULL,
+date_of_repair DATE NOT NULL
+);
+
+/* Dodanie FK do tabeli przeglądy i naprawy */ 
+
+ALTER TABLE przeglady_naprawy
+ADD CONSTRAINT fk_warranty_repair_no FOREIGN KEY (warranty_repair_no)
+REFERENCES gwarancja(warranty_repair_no);
+
+/* Część 2 projektu - dodanie danych do poszczególnych tabel */ 
+
+/* Dodanie danych do tabeli klienci indywidualni */ 
+
+INSERT INTO klient_ind (customer_id, first_name, last_name, phone_number) VALUES
+(100, 'Kamil', 'Wiśniewski', 234786590),
+(110, 'Adam', 'Kowalski', 264935746),
+(120, 'Marzena', 'Terens', 759365947),
+(130, 'Agnieszka', 'Brzózka', 946218453),
+(140, 'Roman', 'Kowalczyk', 745395748),
+(150, 'Andrzej', 'Kędzierski', 263846554),
+(160, 'Jerzy', 'Winiar', 774930765),
+(170, 'Beata', 'Tamińska', 658659090),
+(180, 'Mirosław', 'Jerzyński', 465755843),
+(190, 'Jan', 'Leś', 987065439);
+
+SELECT * FROM klient_ind;
+
+/* Dodanie danych do tabeli klienci biznesowi */ 
+
+INSERT INTO klient_biz (company_id, first_name, last_name, company_name, phone_number, email_address) VALUES
+('CO100', 'Szymon', 'Kusz', 'Artem Sp.z.o.o.', 675895776, 'szymon@artem.pl'),
+('CO110', 'Jarek', 'Miński', 'Moran', 648593057, 'jarek@minsk.pl'),
+('CO120', 'Marek', 'Terens', 'Kirst Sp.z.o.o.', 564447889, 'marek@kirst.pl'),
+('CO130', 'Aneta', 'Maciąg', 'Mat-Or Sp.z.o.o.', 769567034, 'aneta@mator.pl'),
+('CO140', 'Karina', 'Koster', 'Bizon Sp.z.o.o.', 565490667, 'karina@bizon.pl'),
+('CO150', 'Roman', 'Brejza', 'Montesorti', 453223778, 'roman@montesorti.pl'),
+('CO160', 'Bartosz', 'Wiński', 'Dort', 989767889, 'bartosz@dort.pl'),
+('CO170', 'Danuta', 'Orzech', 'Global Sp.z.o.o.', 645843759, 'danuta@global.pl'),
+('CO180', 'Cecylia', 'Lipska', 'Dakopta Sp.z.o.o.', 946998007, 'cecylia@dakopta.pl'),
+('CO190', 'Eliza', 'Opolska', 'Menita Sp.z.o.o.', 675332443, 'eliza@manita.pl');
+
+SELECT * FROM klient_biz;
+
+/* Dodanie danych do tabeli gwarancja */ 
+
+INSERT INTO gwarancja (warranty_repair_no, emp_no, part_no, date_of_repair) VALUES
+(1, 10, 'PT345UK', '2020-05-15'),
+(2, 12, 'PT543IK', '2020-05-20'),
+(3, 14, 'PE433JK', '2020-06-11'),
+(4, 10, 'PT345HG', '2020-06-17'),
+(5, 17, 'PW448LJ', '2020-07-23'),
+(6, 17, 'DF65UIK', '2020-07-26'),
+(7, 14, 'RT564KK', '2020-07-29'),
+(8, 19, '33IKJ89', '2020-08-12'),
+(9, 12, 'DF648JJ', '2020-08-19'),
+(10, 14, '786HJ77', '2020-09-21');
+
+SELECT * FROM gwarancja;
+
+/* Dodanie danych do tabeli przeglady_naprawy klientów indywidualnych */ 
+
+INSERT INTO przeglady_naprawy (VIN_no, part_no, emp_no, profit, cost, warranty_repair_no) VALUES
+('WVWZZZ9WEKU098768', 'PT567HJ', 10, 357.67, 122.89, 1),
+('WVWZZZ4FJGH85940O', 'PF467JH', 13, 1243.67, 234.76, 2),
+('WVWZZZG6457JFHV99', 'PD45FFV', 15, 767.87, 564.65, 3),
+('WVWZZZ3RTKU095612', 'GFH7793CF', 10, 3456.67, 1290.80, 4),
+('WVWZZZ9WEKU098769', 'JKDASFH778', 17, 3421.54, 2309.80, 5),
+('WVWZZZ8URHE172530', 'FGHKHSD988', 18, 3330.67, 1900.76, 6),
+('WVWZZZ0FGHD362840', 'KJLSDF80890V', 14, 36785, 23500, 7),
+('WVWZZZ4HDTE739468', 'GFL;JKSD88', 14, 354.53, 115.90, 8),
+('WVWZZZ3TGNM640264', 'GHCK', 12, 122.70, 90.90, 9),
+('WVWZZZ2JDTG946375', 'PGHFJKKJK9', 10, 978.90, 345.89, 10);
+
+/* Dodanie danych do tabeli przeglady_naprawy klientów biznesowych */ 
+
+INSERT INTO przeglady_naprawy (VIN_no, part_no, emp_no, profit, cost, warranty_repair_no) VALUES
+('WVWZZZ9WEKU09875V', 'PT7SDFG', 13, 3487.78, 2754.65, 1),
+('WVWZZZ9WERT090478', 'SDFBH867', 14, 2654.56, 1254.76, 2),
+('WVWZZZ9ETKU098345', 'IKBSDFV7', 12, 4456.87, 2549.90, 3),
+('WVWZZZ3RTKU095GUC', 'IJHS6439', 13, 2900, 1226.65, 4),
+('WVWZZZ9WEKU098889', '876SDV', 18, 1657.89, 567.54, 5),
+('WVWZZZ8URHE172539', 'SWEFHWHD778', 17, 6743.90, 3476.89, 6),
+('WVWZZZ0FGHD362841', '8765778GU', 15, 342.90, 123.65, 7),
+('WVWZZZ4HDTE739465', '3456NJJJ', 15, 2587.43, 2174.90, 8),
+('WVWZZZ3TGNM640260', 'SDFG3300HRDBN', 12, 1490.90, 670.90, 9),
+('WVWZZZ2JDTG94637T', 'EDGD33', 14, 345.90, 134.45, 10);
+
+SELECT * FROM przeglady_naprawy;
+
+/* Dodanie danych do tabeli samochod klientów indywidualnych */ 
+
+INSERT INTO samochod (car_no, car_id, customer_id, company_id, VIN_no, car_registration, visit_no, date_of_visit) VALUES 
+(1, 1000, 100, null, 'WVWZZZ9WEKU098768', 'PO23GN7', 1, '2020-05-17'),
+(2, 1010, 110, NULL, 'WVWZZZ4FJGH85940O', 'PO29YT6', 1, '2020-07-18'),
+(3, 1020, 120, null, 'WVWZZZG6457JFHV99', 'PO4HY47', 1, '2020-07-22'),
+(4, 1030, 130, NULL, 'WVWZZZ3RTKU095612', 'PO2RT06', 1, '2020-08-13'),
+(5, 1040, 140, null, 'WVWZZZ9WEKU098769', 'PO7UY34', 1, '2020-08-17'),
+(6, 1050, 150, NULL, 'WVWZZZ8URHE172530', 'POP3567', 1, '2020-09-24'),
+(7, 1060, 160, null, 'WVWZZZ0FGHD362840', 'PO29RT6', 1, '2020-09-27'),
+(8, 1010, 110, NULL, 'WVWZZZ4HDTE739468', 'PO29YT6', 2, '2020-09-15'),
+(9, 1050, 150, null, 'WVWZZZ3TGNM640264', 'POP3567', 2, '2020-10-17'),
+(10, 1070, 170, NULL, 'WVWZZZ2JDTG946375', 'PO29YT6', 1, '2020-10-29');
+
+/* Dodanie danych do tabeli samochod klientów biznesowych */ 
+
+INSERT INTO samochod (car_no, car_id, customer_id, company_id, VIN_no, car_registration, visit_no, date_of_visit) VALUES 
+(11, 1080, NULL, 'CO100', 'WVWZZZ9WEKU098768', 'PO2KU67', 1, '2020-05-12'),
+(12, 1090, NULL, 'CO110', 'WVWZZZ9WERT090478', 'PO2ET66', 1, '2020-05-18'),
+(13, 1100, NULL, 'CO120', 'WVWZZZ9ETKU098345', 'PO3IFH6', 1, '2020-06-23'),
+(14, 1110, NULL, 'CO130', 'WVWZZZ3RTKU095612', 'PO7JFYT', 1, '2020-07-10'),
+(15, 1090, NULL, 'CO140', 'WVWZZZ9WEKU098768', 'PO2KU67', 2, '2020-07-19'),
+(16, 1120, NULL, 'CO150', 'WVWZZZ8URHE172530', 'PO2KVJ0', 1, '2020-08-26'),
+(17, 1130, NULL, 'CO160', 'WVWZZZ0FGHD362840', 'PO4GDTY', 1, '2020-08-29'),
+(18, 1140, NULL, 'CO170', 'WVWZZZ4HDTE739468', 'PO2JD84', 1, '2020-09-14'),
+(19, 1150, NULL, 'CO180', 'WVWZZZ3TGNM640264', 'PO3GDT7', 1, '2020-09-22'),
+(20, 1160, NULL, 'CO190', 'WVWZZZ2JDTG946375', 'PO4JD75', 1, '2020-10-23');
+
+SELECT * FROM samochod;
