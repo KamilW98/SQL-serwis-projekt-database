@@ -195,3 +195,35 @@ INSERT INTO samochod (car_no, car_id, customer_id, company_id, VIN_no, car_regis
 (20, 1160, NULL, 'CO190', 'WVWZZZ2JDTG946375', 'PO4JD75', 1, '2020-10-23');
 
 SELECT * FROM samochod;
+
+/* Stworzenie procedur, która pokazuje zysk i koszty przy naprawach pojazdów po wpisaniu parametrów daty */ 
+
+SELECT 
+SUM(profit) FROM przeglady_naprawy a
+JOIN samochod b ON a.VIN_no = b.VIN_no
+WHERE b.date_of_visit BETWEEN '2020-07-01' AND '2020-07-30';
+
+DELIMITER $$
+CREATE PROCEDURE p_profit (p_date_of_visit date, p_end_of_visit date) 
+BEGIN
+SELECT 
+SUM(a.profit) FROM przeglady_naprawy a
+JOIN samochod b ON a.VIN_no = b.VIN_no
+WHERE date_of_visit BETWEEN '2020-07-01' AND '2020-07-30';
+end$$
+delimiter ;
+
+SELECT 
+SUM(cost) FROM przeglady_naprawy a
+JOIN samochod b ON a.VIN_no = b.VIN_no
+WHERE b.date_of_visit BETWEEN '2020-07-01' AND '2020-07-30';
+
+DELIMITER $$
+CREATE PROCEDURE p_cost (p_date_of_visit date, p_end_of_visit date) 
+BEGIN
+SELECT 
+SUM(a.cost) FROM przeglady_naprawy a
+JOIN samochod b ON a.VIN_no = b.VIN_no
+WHERE date_of_visit BETWEEN '2020-07-01' AND '2020-07-30';
+end$$
+delimiter ;
